@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  mysql:
+    image: mysql:5.6
+    container_name: mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD="yes"
+      - MYSQL_DATABASE=stress-test
+    volumes:
+      - ./local-db/:/docker-entrypoint-initdb.d/:ro
+    networks:
+      - local-network
+
+  spring-boot:
+    restart: always
+    build: ./
+    container_name: spring-stress-test
+    depends_on:
+      - mysql
+    environment:
+      - WAIT_HOSTS=mysql:3306
+    ports:
+      - 9000:9000
+    networks:
+      - local-network
+
+networks:
+  local-network:
+    name: "local-network"
